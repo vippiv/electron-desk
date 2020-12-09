@@ -1,0 +1,98 @@
+*,
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'PingFangSC', 'helvetica neue', 'hiragino sans gb', 'arial', 'microsoft yahei ui', 'microsoft yahei', 'simsun', 'sans-serif', 'Source Han Sans CN Regular', 'Source Han Sans CN Regular-Regular' !important;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow: hidden;
+
+}
+
+body {
+	background: #fff;
+	/* -webkit-app-region: drag; */
+}
+.drug-class {
+	-webkit-app-region: drag;
+}
+p,
+span,
+ol,
+ul,
+button,
+input,
+i,
+a,
+li,
+textarea,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+table,
+tr,
+td,
+th,
+tbody,
+thead,
+.record-msg {
+	-webkit-app-region: no-drag;
+}
+
+ol,
+ul,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	text-decoration: none;
+	color: inherit
+}
+
+a:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+a:link {
+	text-decoration: none;
+}
+
+a:visit {
+	text-decoration: none;
+}
+
+a:focus {
+	text-decoration: none;
+}
+
+ul li:hover {
+	cursor: pointer;
+}
+
+ul li {
+	list-style: none;
+}
+
+button {
+	border: none;
+	outline: none;
+	background: none;
+}
+
+input,
+textarea {
+	outline: none;
+}
