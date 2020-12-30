@@ -176,17 +176,8 @@ function closeHandle () {
 	win = null
 }
 
-ipcMain.on('window-max', function () {
-	// 生产环境
-	if (!win.isFullScreen()) {
-		win.setFullScreen(true)
-	} else {
-		win.setFullScreen(false)
-		win.restore()
-	}
-})
 ipcMain.on('window-close', function () {
-	win.hide()
+	win.destroy()
 	app.quit()
 })
 

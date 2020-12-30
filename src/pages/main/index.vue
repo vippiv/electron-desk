@@ -40,19 +40,21 @@ export default {
 		MenuBar,
 	},
 	data () {
-		return {};
+		return {
+			isWinMax: false
+		}
 	},
-	created () {
-	},
+	created () {},
 	methods: {
-		// 窗口最小
 		minimizeWin () {
 			win.minimize()
-			win.setSkipTaskbar(true)
+			win.setSkipTaskbar(true) // 取消任务栏上的图标
 			ipcRenderer.send('trayHandle')
 		},
 		maximizeWin () {
-			ipcRenderer.send('window-max')
+			// win.isMaximized()属性无效，一直都是false，相关资料显示该issue一直存在，官方未修复
+			!this.isWinMax ? win.maximize() : win.unmaximize()
+			this.isWinMax = !this.isWinMax
 		},
 		closeWin () {
 			ipcRenderer.send('window-close')
