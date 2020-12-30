@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import MenuBar from './../../components/sidebar/menu-bar'
+import MenuBar from '@/components/sidebar/menu-bar'
 const remote = window.require('electron').remote
 const ipcRenderer = window.require('electron').ipcRenderer
 

@@ -3,15 +3,10 @@ import { app, protocol, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import baseInfo from './utils/config.js'
-import WebSocket from 'ws';
 const log = require('electron-log')
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const path = require('path')
-let userId = ''
-let win
-const wsUrl = baseInfo.SOCKET_HOST
-
-let socket = null
+let win = null
 /**
  *  protocol可以注册一个协议，或者使用已经存在的协议
  *	protocol只在app ready事件后才能使用
@@ -25,7 +20,9 @@ const isWindows = process.platform === 'win32'
 
 function createWindow () {
 	Menu.setApplicationMenu(null)
-	// Create the browser window.
+	/**
+	 *  TODO 窗口最小化再打开，窗口高度会缩小一点，在重新打开的地方重新设置尺寸，第一次有效，第二次及以后无效
+	 */
 	win = new BrowserWindow({
 		width: 1000,
 		height: 600,
@@ -66,11 +63,6 @@ function createWindow () {
 	// win.on("will-resize", resizeWindow);
 }
 
-ipcMain.on('initSocketHandle', function (event, data) {
-	userId = data.userId
-	initSocket()
-})
-
 // 异步消息
 ipcMain.on('async-msg', (evt, args) => {
 	evt.sender.send('async-reply', `pong ${Math.floor(Math.random() * 1000000)}`)
@@ -86,43 +78,55 @@ let timer = null, count = 0
 // 自定义托盘
 function setTray () {
 	// 系统托盘图标目录
-	let trayMenuTemplate = []
-	// let iconPath = path.join(__dirname, './bundled/favicon.icon')
-	let iconPath = path.join(__static, 'favicon.ico')
+	let trayMenuTemplate = [
+		{
+			label: '打开主面板',
+			icon: '',
+			click: () => {
+				console.log('打开在主面板')
+				reOpenWin()
+			}
+		}, {
+			label: '锁定',
+			icon: '',
+			click: () => {
+				console.log('锁定')
+			}
+		}, {
+			label: '退出',
+			icon: '',
+			click: () => {
+				console.log('quit')
+			}
+		}
+	]
+	let iconPath = path.join(__static, 'favicon.ico') // 最小化到托盘的图标
 	appTray = new Tray(iconPath)
 	// 图标的上下文菜单
 	const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
 	// 隐藏主窗口
 	win.hide()
 	// 设置托盘悬浮提示
-	appTray.setToolTip('管理后台')
+	appTray.setToolTip('electron desk')
 	// 设置 托盘菜单
 	appTray.setContextMenu(contextMenu)
 	// 点击托盘
-	appTray.on('click', function () {
-		clearInterval(timer)
-		count = 0
-		// 显示主程序
-		win.show()
-		// 关闭托盘显示
-		appTray.destroy()
+	appTray.on('double-click', function () {
+		reOpenWin()
 	})
 }
+
+function reOpenWin () {
+	clearInterval(timer)
+	count = 0
+	win.show() // 显示主程序
+	win.setSize(1000, 600)
+	appTray.destroy() // 删除系统托盘图标
+}
+
 ipcMain.on('trayHandle', function () {
 	setTray()
 })
-
-//socket 链接
-function initSocket () {
-	let URL = wsUrl + userId
-	socket = new WebSocket(URL)
-	socket.on('open', function () {
-		log.info('建立socket 链接')
-		socket.onmessage = message
-		socket.onerror = errorHandle
-		socket.onclose = closeHandle
-	})
-}
 
 function message (data) {
 	if (JSON.parse(data.data).data != '' && JSON.stringify(JSON.parse(data.data).data).indexOf('kill process') != -1) {
@@ -170,9 +174,6 @@ function closeHandle () {
 	win = null
 }
 
-ipcMain.on('sendMessage', function (event, data) {
-	socket.send(data)
-})
 ipcMain.on('window-max', function () {
 	// 生产环境
 	if (!win.isFullScreen()) {
