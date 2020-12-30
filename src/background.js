@@ -97,6 +97,7 @@ function setTray () {
 			icon: '',
 			click: () => {
 				console.log('quit')
+				app.quit()
 			}
 		}
 	]
