@@ -32,6 +32,7 @@
 import MenuBar from '@/components/sidebar/menu-bar'
 const remote = window.require('electron').remote
 const ipcRenderer = window.require('electron').ipcRenderer
+const win = remote.getCurrentWindow()
 
 export default {
 	name: 'app',
@@ -46,8 +47,8 @@ export default {
 	methods: {
 		// 窗口最小
 		minimizeWin () {
-			const win = remote.getCurrentWindow();
-			win.minimize();
+			win.minimize()
+			win.setSkipTaskbar(true)
 			ipcRenderer.send('trayHandle')
 		},
 		maximizeWin () {

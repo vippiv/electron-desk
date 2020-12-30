@@ -122,6 +122,7 @@ function reOpenWin () {
 	count = 0
 	win.show() // 显示主程序
 	win.setSize(1000, 600)
+	win.setSkipTaskbar(false)
 	appTray.destroy() // 删除系统托盘图标
 }
 
