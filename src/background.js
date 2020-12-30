@@ -12,7 +12,10 @@ let win
 const wsUrl = baseInfo.SOCKET_HOST
 
 let socket = null
-// Scheme must be registered before the app is ready
+/**
+ *  protocol可以注册一个协议，或者使用已经存在的协议
+ *	protocol只在app ready事件后才能使用
+ */
 protocol.registerSchemesAsPrivileged([
 	{ scheme: 'app', privileges: { secure: true, standard: true } }
 ])
@@ -62,10 +65,22 @@ function createWindow () {
 	})
 	// win.on("will-resize", resizeWindow);
 }
+
 ipcMain.on('initSocketHandle', function (event, data) {
 	userId = data.userId
 	initSocket()
 })
+
+// 异步消息
+ipcMain.on('async-msg', (evt, args) => {
+	evt.sender.send('async-reply', `pong ${Math.floor(Math.random() * 1000000)}`)
+})
+
+// 同步消息
+ipcMain.on('sync-msg', (evt, args) => {
+	evt.returnValue = 'sync ' + args + ' pong ' + Math.floor(Math.random() * 1000000)
+})
+
 let appTray = null
 let timer = null, count = 0
 // 自定义托盘
@@ -103,8 +118,6 @@ function initSocket () {
 	socket = new WebSocket(URL)
 	socket.on('open', function () {
 		log.info('建立socket 链接')
-		//心跳检测重置
-		// heartCheck.start();
 		socket.onmessage = message
 		socket.onerror = errorHandle
 		socket.onclose = closeHandle
@@ -156,27 +169,7 @@ function errorHandle () {
 function closeHandle () {
 	win = null
 }
-//心跳检测
-var heartCheck = {
-	timeout: 3000, //每隔三秒发送心跳
-	num: 3,  //3次心跳均未响应重连
-	timeoutObj: null,
-	serverTimeoutObj: null,
-	start: function () {
-		var _num = this.num;
-		this.timeoutObj && clearTimeout(this.timeoutObj);
-		this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj)
-		this.timeoutObj = setTimeout(function () {
-			//这里发送一个心跳，后端收到后，返回一个心跳消息，
-			socket.send(JSON.stringify({ event: "PING" })); // 心跳包
-			_num--;
-			//计算答复的超时次数
-			if (_num === 0) {
-				socket.colse();
-			}
-		}, this.timeout)
-	}
-}
+
 ipcMain.on('sendMessage', function (event, data) {
 	socket.send(data)
 })
@@ -237,6 +230,27 @@ app.on('ready', async () => {
 	createWindow()
 })
 
+/**
+ * 某个窗口失去焦点是触发，用于打开多窗口的情况
+ */
+app.on('browser-window-blur', (evt) => {
+	// console.log('browser-window-blur hahhah', evt)
+})
+
+/**
+ * 某个窗口获得焦点是触发，用于打开多窗口的情况
+ */
+app.on('browser-window-focus', (evt) => {
+	// console.log('browser-window-focus hahah', evt)
+})
+
+/**
+ * 新创建一个窗口时触发，用于打开多窗口的情况
+ */
+app.on('browser-window-created', (evt) => {
+	// console.log('browser-window-created haha', evt)
+})
+
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
 	if (process.platform === 'win32') {
@@ -251,3 +265,13 @@ if (isDevelopment) {
 		})
 	}
 }
+
+
+// process.platform在Max OS X平台会返回darwin
+// 在64位Windows平台下process.platform会返回win32
+
+/**
+ * ipcMain 主进程中使用，控制着从渲染进程中发送过来的异步和同步的消息
+ * ipcRender 渲染进程中使用，向主进程发送消息
+ * 主进程可往渲染进程发消息(ipcMain webContents.send)，渲染进程也可向主进程发消息(ipcRender)
+ */

@@ -1,24 +1,5 @@
-# elec
+# electron desk demo
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## TODO 
+    多窗口通信 https://blog.csdn.net/weixin_30760895/article/details/99485449
+    窗口内容和窗口如何通信

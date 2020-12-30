@@ -96,3 +96,6 @@ input,
 textarea {
 	outline: none;
 }
+.app-container {
+	padding: 15px;
+}
